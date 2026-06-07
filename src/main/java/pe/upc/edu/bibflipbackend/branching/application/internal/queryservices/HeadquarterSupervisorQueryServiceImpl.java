@@ -1,6 +1,6 @@
 package pe.upc.edu.bibflipbackend.branching.application.internal.queryservices;
 
-import pe.upc.edu.bibflipbackend.branching.apllication.internal.outboundedservice.acl.ExternalIamService;
+import pe.upc.edu.bibflipbackend.branching.application.internal.outboundedservice.acl.ExternalIamService;
 import pe.upc.edu.bibflipbackend.branching.domain.model.queries.GetAllHeadquarterSupervisorByIdHeadquarter;
 import pe.upc.edu.bibflipbackend.branching.domain.model.queries.GetHeadquarterIdBySupervisorId;
 import pe.upc.edu.bibflipbackend.branching.domain.model.valueobjects.HeadquarterData;
@@ -50,7 +50,8 @@ public class HeadquarterSupervisorQueryServiceImpl implements HeadquarterSupervi
         return supervisors.stream()
                 .map(supervisor -> {
                     Long userId = supervisor.getUserId().userId();
-                    String username = externalIamService.getUsernameById(userId);
+//                    String username = externalIamService.getUsernameById(userId);
+                    String username = "Usuario";
                     return new HeadquarterData(userId, username, query.headquarterId());
                 })
                 .collect(Collectors.toList());
@@ -62,10 +63,10 @@ public class HeadquarterSupervisorQueryServiceImpl implements HeadquarterSupervi
 
         // Validar que el supervisor existe
         Long supervisorId = query.supervisorId();
-        if (externalIamService.existsUserById(supervisorId)) {
-            logger.warn("Supervisor con ID {} no encontrado", supervisorId);
-            throw new ResourceNotFoundException("Supervisor " + supervisorId);
-        }
+//        if (externalIamService.existsUserById(supervisorId)) {
+//            logger.warn("Supervisor con ID {} no encontrado", supervisorId);
+//            throw new ResourceNotFoundException("Supervisor " + supervisorId);
+//        }
 
         // Buscar todas las asignaciones del supervisor
         var assignments = headquarterSupervisorRepository.findByUserId(new UserId(supervisorId));
@@ -79,7 +80,8 @@ public class HeadquarterSupervisorQueryServiceImpl implements HeadquarterSupervi
         // En un caso real, podría necesitarse una lógica más específica
         var assignment = assignments.get(0);
         var headquarterId = assignment.getHeadquarter().getId();
-        String username = externalIamService.getUsernameById(supervisorId);
+//        String username = externalIamService.getUsernameById(supervisorId);
+        String username = "Usuario";
 
         logger.info("Encontrada sede con ID {} para el supervisor {}", headquarterId, supervisorId);
 

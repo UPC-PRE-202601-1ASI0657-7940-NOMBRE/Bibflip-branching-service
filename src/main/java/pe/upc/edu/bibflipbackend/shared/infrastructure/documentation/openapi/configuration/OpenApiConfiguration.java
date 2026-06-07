@@ -27,18 +27,6 @@ public class OpenApiConfiguration {
                                 .name("Apache 2.0")
                                 .url("https://www.apache.org/licenses/LICENSE-2.0.html")));
 
-        final String securitySchemeName = "bearerAuth";
-        Components components = new Components();
-        components.addSecuritySchemes(securitySchemeName,
-                new SecurityScheme()
-                        .name(securitySchemeName)
-                        .type(SecurityScheme.Type.HTTP)
-                        .scheme("bearer")
-                        .bearerFormat("JWT"));
-        openApi.components(components);
-
-        SecurityRequirement securityRequirement = new SecurityRequirement().addList(securitySchemeName);
-        openApi.addSecurityItem(securityRequirement);
 
         return openApi;
     }
