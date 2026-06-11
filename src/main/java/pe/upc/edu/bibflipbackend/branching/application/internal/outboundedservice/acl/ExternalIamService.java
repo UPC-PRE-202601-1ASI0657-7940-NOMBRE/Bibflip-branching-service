@@ -1,51 +1,62 @@
 package pe.upc.edu.bibflipbackend.branching.application.internal.outboundedservice.acl;
 
 //import pe.upc.edu.bibflipbackend.iam.interfaces.acl.IamContextFacade;
+import feign.FeignException;
 import org.springframework.stereotype.Service;
+import pe.upc.edu.bibflipbackend.branching.application.internal.feignclient.IAMClient;
+import pe.upc.edu.bibflipbackend.branching.application.internal.feignclient.UserDTO;
 
 @Service
 public class ExternalIamService {
-//    private final IamContextFacade iamContextFacade;
-//
-//    public ExternalIamService(IamContextFacade iamContextFacade) {
-//        this.iamContextFacade = iamContextFacade;
-//    }
-//
-//    /**
-//     * Verifica si un usuario existe.
-//     * @param userId El ID del usuario.
-//     * @return true si el usuario existe, false en caso contrario.
-//     */
-//    public boolean existsUserById(Long userId) {
-//        return !iamContextFacade.existsUser(userId);
-//    }
-//
-//    /**
-//     * Obtiene el nombre de usuario por su ID.
-//     * @param userId El ID del usuario.
-//     * @return El nombre de usuario o cadena vacía si no existe.
-//     */
-//    public String getUsernameById(Long userId) {
-//        return iamContextFacade.fetchUsernameByUserId(userId);
-//    }
-//
-//    /**
-//     * Verifica si un usuario tiene un rol específico.
-//     * @param userId El ID del usuario.
-//     * @param roleName El nombre del rol a verificar (sin el prefijo ROLE_).
-//     * @return true si el usuario tiene el rol, false en caso contrario.
-//     */
-//    public boolean hasRole(Long userId, String roleName) {
-//        String roles = iamContextFacade.getUserRolesByUserId(userId);
-//        return roles.contains("ROLE_" + roleName);
-//    }
-//
-//    /**
-//     * Verifica si un usuario tiene el rol SUPERVISOR.
-//     * @param userId El ID del usuario.
-//     * @return true si el usuario tiene el rol SUPERVISOR, false en caso contrario.
-//     */
-//    public boolean isSupervisor(Long userId) {
-//        return hasRole(userId, "SUPERVISOR");
-//    }
+
+    private final IAMClient iamClient;
+
+    public ExternalIamService(IAMClient iamClient) {
+        this.iamClient = iamClient;
+    }
+
+    public boolean userExists(Long userId) {
+        try {
+            iamClient.getUserById(userId);
+            return true;
+        } catch (FeignException.NotFound exception) {
+            return false;
+        }
+    }
+
+    public UserDTO getUserById(Long userId) {
+        return iamClient.getUserById(userId);
+    }
+
+    public String getUsername(Long userId) {
+        return getUserById(userId).username();
+    }
+
+    public String getMainRole(Long userId) {
+        var user = getUserById(userId);
+
+        if (user.roles() == null || user.roles().isEmpty()) {
+            return null;
+        }
+
+        return user.roles().get(0);
+    }
+
+    public boolean userHasRole(Long userId, String role) {
+        var user = getUserById(userId);
+
+        if (user.roles() == null) {
+            return false;
+        }
+
+        return user.roles().contains(role);
+    }
+
+    public boolean isSupervisor(Long userId) {
+        return userHasRole(userId, "ROLE_SUPERVISOR");
+    }
+
+    public boolean isAdmin(Long userId) {
+        return userHasRole(userId, "ROLE_ADMIN");
+    }
 }

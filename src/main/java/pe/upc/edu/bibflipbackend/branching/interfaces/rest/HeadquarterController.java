@@ -8,6 +8,8 @@ import pe.upc.edu.bibflipbackend.branching.interfaces.rest.resources.CreateHeadq
 import pe.upc.edu.bibflipbackend.branching.interfaces.rest.resources.HeadquarterResource;
 import pe.upc.edu.bibflipbackend.branching.interfaces.rest.transform.CreateHeadquarterCommandFromResourceAssembler;
 import pe.upc.edu.bibflipbackend.branching.interfaces.rest.transform.HeadquarterResourceFromEntityAssembler;
+import pe.upc.edu.bibflipbackend.branching.interfaces.rest.resources.HeadquarterScheduleResource;
+import pe.upc.edu.bibflipbackend.branching.interfaces.rest.transform.HeadquarterScheduleResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -44,6 +46,22 @@ public class HeadquarterController {
         if (headquarter.isEmpty()) return ResponseEntity.notFound().build();
         var headquarterResource = HeadquarterResourceFromEntityAssembler.toResourceFromEntity(headquarter.get());
         return ResponseEntity.ok(headquarterResource);
+    }
+
+    @GetMapping(value = "/{headquarterId}/exists", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Boolean> headquarterExists(@PathVariable Long headquarterId) {
+        var getHeadquarterByIdQuery = new GetHeadquarterByIdQuery(headquarterId);
+        var headquarter = headquarterQueryService.handle(getHeadquarterByIdQuery);
+        return ResponseEntity.ok(headquarter.isPresent());
+    }
+
+    @GetMapping(value = "/{headquarterId}/schedule", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<HeadquarterScheduleResource> getHeadquarterSchedule(@PathVariable Long headquarterId) {
+        var getHeadquarterByIdQuery = new GetHeadquarterByIdQuery(headquarterId);
+        var headquarter = headquarterQueryService.handle(getHeadquarterByIdQuery);
+        if (headquarter.isEmpty()) return ResponseEntity.notFound().build();
+        var scheduleResource = HeadquarterScheduleResourceFromEntityAssembler.toResourceFromEntity(headquarter.get());
+        return ResponseEntity.ok(scheduleResource);
     }
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
